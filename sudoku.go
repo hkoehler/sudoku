@@ -11,6 +11,13 @@ import (
 const Size = 9
 const BoxSize = 3
 
+const (
+	EASY   = 20
+	MEDIUM = 40
+	HARD   = 50
+	EVIL   = 55
+)
+
 type Board struct {
 	// state of board
 	board [Size][Size]uint8
@@ -103,16 +110,73 @@ func (b *Board) solve(i int) bool {
 
 // DFS search
 func (b *Board) Solve(n int) int {
+	b.numSolutions = 0
 	b.maxNumSolutions = n
 	b.solve(0)
 	return b.numSolutions
+}
+
+// Deep copy
+func (b *Board) Copy() *Board {
+	b2 := NewBoard()
+	for r := 0; r < Size; r++ {
+		copy(b2.board[r][:], b.board[r][:])
+	}
+	return b2
+}
+
+// Punch n holes in board
+// Try to find only single solution to puzzle.
+func (b *Board) Punch(n int) {
+	for {
+		b1 := b.Copy()
+		// punch n holes
+		total := 0
+		for total < n {
+			// pick random square and value
+			r := rand.Int() % Size
+			c := rand.Int() % Size
+			if b1.board[r][c] == 0 {
+				continue
+			}
+			b1.board[r][c] = 0
+			total++
+		}
+		b2 := b1.Copy()
+		if b2.Solve(2) == 1 {
+			*b = *b1
+			return
+		}
+		// try punchin holes again and solve it
+	}
+}
+
+// Shuffle numbers to create equal puzzle
+func (b *Board) Shuffle() {
+	var mapping [Size + 1]uint8
+
+	// map i to i by default
+	for i := uint8(1); i <= Size; i++ {
+		mapping[i] = i
+	}
+	// switch numbers randomly
+	for i := 0; i < 10; i++ {
+		i1 := rand.Int()%Size + 1
+		i2 := rand.Int()%Size + 1
+		mapping[i1], mapping[i2] = mapping[i2], mapping[i1]
+	}
+	for r := 0; r < Size; r++ {
+		for c := 0; c < Size; c++ {
+			b.board[r][c] = mapping[b.board[r][c]]
+		}
+	}
 }
 
 // Generate board with given number of filled squares
 func (b *Board) Generate(seed int64) {
 	total := 0
 	rand.Seed(seed)
-	for total < 10 {
+	for total < 5 {
 		// pick random square and value
 		r := rand.Int() % Size
 		c := rand.Int() % Size
@@ -128,4 +192,32 @@ func (b *Board) Generate(seed int64) {
 		total++
 	}
 	b.Solve(1)
+}
+
+// Sudoku comprises multiple puzzzles with same solution
+type Sudoku struct {
+	Easy   *Board
+	Medium *Board
+	Hard   *Board
+	Evil   *Board
+}
+
+// NewSudoku generates puzzle at various difficutly levels with same solution.
+func NewSudoku(seed int64) *Sudoku {
+	b := NewBoard()
+	b.Generate(seed)
+	b.Punch(EASY)
+	easy := b.Copy()
+	b.Punch(MEDIUM - EASY)
+	medium := b.Copy()
+	b.Punch(HARD - MEDIUM)
+	hard := b.Copy()
+	b.Punch(EVIL - HARD)
+	evil := b.Copy()
+	return &Sudoku{
+		Easy:   easy,
+		Medium: medium,
+		Hard:   hard,
+		Evil:   evil,
+	}
 }

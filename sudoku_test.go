@@ -11,6 +11,9 @@ func TestBasic(t *testing.T) {
 	if b.Check() == false {
 		t.Fail()
 	}
+	if b.Solve(1) != 1 {
+		t.Fail()
+	}
 }
 
 func TestGenerator(t *testing.T) {
@@ -22,4 +25,41 @@ func TestGenerator(t *testing.T) {
 		}
 		t.Logf("\n%s\n", b)
 	}
+}
+
+func TestPunch(t *testing.T) {
+	b := NewBoard()
+	b.Generate(42)
+	t.Logf("Solution:\n%s\n", b)
+	// easy puzzle
+	b.Punch(20)
+	t.Logf("Easy:\n%s\n", b)
+	// medium puzzle
+	b.Punch(20)
+	t.Logf("Medium:\n%s\n", b)
+	// hard puzzle
+	b.Punch(10)
+	t.Logf("Hard:\n%s\n", b)
+	// evil puzzle
+	b.Punch(5)
+	t.Logf("Evil:\n%s\n", b)
+}
+
+func TestShuffle(t *testing.T) {
+	b := NewBoard()
+	b.Generate(13)
+	t.Logf("Solution:\n%s\n", b)
+	b.Shuffle()
+	t.Logf("Shuffled solution:\n%s\n", b)
+	if b.Check() == false {
+		t.Fail()
+	}
+}
+
+func TestSudoku(t *testing.T) {
+	s := NewSudoku(0)
+	t.Logf("Easy:\n%s\n", s.Easy)
+	t.Logf("Medium:\n%s\n", s.Medium)
+	t.Logf("Hard:\n%s\n", s.Hard)
+	t.Logf("Evil:\n%s\n", s.Evil)
 }
