@@ -49,7 +49,7 @@ func TestShuffle(t *testing.T) {
 	b := NewBoard()
 	b.Generate(13)
 	t.Logf("Solution:\n%s\n", b)
-	b.Shuffle()
+	b.Shuffle(42)
 	t.Logf("Shuffled solution:\n%s\n", b)
 	if b.Check() == false {
 		t.Fail()
@@ -57,9 +57,12 @@ func TestShuffle(t *testing.T) {
 }
 
 func TestSudoku(t *testing.T) {
-	s := NewSudoku(0)
-	t.Logf("Easy:\n%s\n", s.Easy)
-	t.Logf("Medium:\n%s\n", s.Medium)
-	t.Logf("Hard:\n%s\n", s.Hard)
-	t.Logf("Evil:\n%s\n", s.Evil)
+	for i := int64(0); i < 10; i++ {
+		s := NewSudoku(i, 42)
+		t.Logf("Solution:\n%s\n", s.Solution)
+		t.Logf("Easy:\n%s\n", s.Easy)
+		t.Logf("Medium:\n%s\n", s.Medium)
+		t.Logf("Hard:\n%s\n", s.Hard)
+		t.Logf("Evil:\n%s\n", s.Evil)
+	}
 }

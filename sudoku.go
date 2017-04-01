@@ -128,6 +128,7 @@ func (b *Board) Copy() *Board {
 // Punch n holes in board
 // Try to find only single solution to puzzle.
 func (b *Board) Punch(n int) {
+	rand.Seed(0)
 	for {
 		b1 := b.Copy()
 		// punch n holes
@@ -143,18 +144,25 @@ func (b *Board) Punch(n int) {
 			total++
 		}
 		b2 := b1.Copy()
-		if b2.Solve(2) == 1 {
+		numSolutions := b2.Solve(2)
+		switch numSolutions {
+		case 0:
+			continue
+		case 1:
 			*b = *b1
 			return
+		case 2:
+			// try punchin holes again and solve it
+			continue
 		}
-		// try punchin holes again and solve it
 	}
 }
 
 // Shuffle numbers to create equal puzzle
-func (b *Board) Shuffle() {
+func (b *Board) Shuffle(seed int64) {
 	var mapping [Size + 1]uint8
 
+	rand.Seed(seed)
 	// map i to i by default
 	for i := uint8(1); i <= Size; i++ {
 		mapping[i] = i
@@ -196,28 +204,32 @@ func (b *Board) Generate(seed int64) {
 
 // Sudoku comprises multiple puzzzles with same solution
 type Sudoku struct {
-	Easy   *Board
-	Medium *Board
-	Hard   *Board
-	Evil   *Board
+	Solution *Board
+	Easy     *Board
+	Medium   *Board
+	Hard     *Board
+	Evil     *Board
 }
 
 // NewSudoku generates puzzle at various difficutly levels with same solution.
-func NewSudoku(seed int64) *Sudoku {
+func NewSudoku(seed int64, shuffle int64) *Sudoku {
 	b := NewBoard()
 	b.Generate(seed)
+	b.Shuffle(shuffle)
+	s := b.Copy()
 	b.Punch(EASY)
 	easy := b.Copy()
 	b.Punch(MEDIUM - EASY)
 	medium := b.Copy()
 	b.Punch(HARD - MEDIUM)
 	hard := b.Copy()
-	b.Punch(EVIL - HARD)
-	evil := b.Copy()
+	//b.Punch(EVIL - HARD)
+	//evil := b.Copy()
 	return &Sudoku{
-		Easy:   easy,
-		Medium: medium,
-		Hard:   hard,
-		Evil:   evil,
+		Solution: s,
+		Easy:     easy,
+		Medium:   medium,
+		Hard:     hard,
+		//Evil:     evil,
 	}
 }
