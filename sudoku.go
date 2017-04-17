@@ -233,3 +233,33 @@ func NewSudoku(seed int64, shuffle int64) *Sudoku {
 		//Evil:     evil,
 	}
 }
+
+type SudokuJSON struct {
+	Solution, Easy, Medium, Hard json.RawMessage
+}
+
+func (s *Sudoku) Write() ([]byte, error) {
+	var out SudokuJSON
+
+	if solutionJSON, err := s.Solution.Write(); err != nil {
+		return nil, err
+	} else {
+		out.Solution = json.RawMessage(solutionJSON)
+	}
+	if easyJSON, err := s.Easy.Write(); err != nil {
+		return nil, err
+	} else {
+		out.Easy = json.RawMessage(easyJSON)
+	}
+	if mediumJSON, err := s.Medium.Write(); err != nil {
+		return nil, err
+	} else {
+		out.Medium = json.RawMessage(mediumJSON)
+	}
+	if hardJSON, err := s.Hard.Write(); err != nil {
+		return nil, err
+	} else {
+		out.Hard = json.RawMessage(hardJSON)
+	}
+	return json.Marshal(&out)
+}
